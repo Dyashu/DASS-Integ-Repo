@@ -52,7 +52,7 @@ const SubPages = ({kontent}) => {
             <div className='sub-nav-name'>
             {konts.subidS.length !== 0 ? (
                 <>
-                <span onClick={() => DisplayPage(konts.index)}>{konts.title}</span>
+                <span style={{ paddingLeft:"55px" }} onClick={() => DisplayPage(konts.index)}>{konts.title}</span>
                   <div
                     className="dropdown-icon"
                     onClick={() => toggleDropdown(konts,konts.index)}
@@ -61,7 +61,7 @@ const SubPages = ({kontent}) => {
                   </div>
                 </>
               ) : (
-                <span onClick={() => DisplayPage(konts.index)}>{konts.title}</span>
+                <span  style={{ paddingLeft:"55px" }} onClick={() => DisplayPage(konts.index)}>{konts.title}</span>
               )}</div>
               {dropdownStates[konts.index] && subPages[konts.index] ? (
               <SubPages 
@@ -106,7 +106,7 @@ const Navbar = () => {
     
     const DisplayPage = (index) => {
       console.log(index);
-      if(index == 1)
+      if(index === 1)
       {
         navigate(`/display-parallax`);
       }
@@ -150,7 +150,7 @@ const Navbar = () => {
             <div className='nav-name'>
             {page.subidS.length !== 0 ? (
               <>
-                <span onClick={() => DisplayPage(page.index)}>{page.title}</span>
+                <span style={{ paddingLeft:"55px" }} onClick={() => DisplayPage(page.index)}>{page.title}</span>
                 <div
                   className="dropdown-icon"
                   onClick={() => toggleDropdown(page,page.index)}
@@ -159,7 +159,7 @@ const Navbar = () => {
                 </div>
               </>
             ) : (
-              <span onClick={() => DisplayPage(page.index)}>{page.title}</span>
+              <span style={{ paddingLeft:"55px" }} onClick={() => DisplayPage(page.index)}>{page.title}</span>
               )}</div>
             {dropdownStates[page.index] && subPages[page.index] ? (
             <SubPages 

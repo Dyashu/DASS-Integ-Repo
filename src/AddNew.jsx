@@ -862,7 +862,7 @@ export default function AddNewPage() {
           <div className="arrow" onClick={() => setShow(false)}>
             <FontAwesomeIcon icon={faAngleRight} />
           </div>
-          <div className="add-new-container">
+          <div className="container">
             <div className="Tabs">
               {New ? (
                 <>
