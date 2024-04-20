@@ -7,41 +7,42 @@ import {
   faAngleLeft,
   faAngleRight,
 } from "@fortawesome/free-solid-svg-icons";
-import ReactQuill, { Quill } from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import ImageResize from 'quill-image-resize-module-react';
+import ReactQuill, { Quill } from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import ImageResize from "quill-image-resize-module-react";
 import { useNavigate } from "react-router-dom";
 // import "react-quill/dist/quill.core.css";
 
-Quill.register('modules/imageResize', ImageResize);
+
+Quill.register("modules/imageResize", ImageResize);
 
 const Items = ["Image", "Text", "Blocks"];
 
 const modules = {
   toolbar: [
-    [{ header: '1' }, { header: '2' }, { font: [] }],
+    [{ header: "1" }, { header: "2" }, { font: [] }],
     [{ size: [] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    ["bold", "italic", "underline", "strike", "blockquote"],
     [
-      { list: 'ordered' },
-      { list: 'bullet' },
-      { indent: '-1' },
-      { indent: '+1' }
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" },
     ],
-    [{ align : [] }],
-    ['link', 'image', 'video'],
-    ['clean']
+    [{ align: [] }],
+    ["link", "image", "video"],
+    ["clean"],
   ],
   clipboard: {
-    matchVisual: false
+    matchVisual: false,
   },
   imageResize: {
-    parchment: Quill.import('parchment'),
-    modules: ['Resize', 'DisplaySize'],
-  }
-}
+    parchment: Quill.import("parchment"),
+    modules: ["Resize", "DisplaySize"],
+  },
+};
 
-export default function DisplayEditPage({ Edititems,responseData }) {
+export default function DisplayEditPage({ Edititems, responseData }) {
   const navigate = useNavigate();
   const [Show, setShow] = useState(false);
   const [New, setNew] = useState(false);
@@ -49,11 +50,11 @@ export default function DisplayEditPage({ Edititems,responseData }) {
   const [selectedItems, setSelectedItems] = useState([]);
   const [blockId, setBlockId] = useState(0);
 
-  useEffect(()=>{
+  useEffect(() => {
     let maxBlockID = 0;
     Edititems.forEach((obj) => {
-      if(obj.type === "Blocks"){
-        if(obj.block_id > maxBlockID){
+      if (obj.type === "Blocks") {
+        if (obj.block_id > maxBlockID) {
           maxBlockID = obj.block_id;
         }
       }
@@ -62,72 +63,31 @@ export default function DisplayEditPage({ Edititems,responseData }) {
     console.log(selectedItems);
     setBlockId(maxBlockID);
     setSelectedItems(Edititems);
-  },[Edititems]);
-  
+  }, [Edititems]);
+
   const handleItemClick = (index) => {
     setNew(false);
     setSelectedIndex(index);
   };
 
-  const handleHeightChange = (value, index, item) => {
+  const handleAttributeChange = (attribute, value, index, item) => {
     const newItems = [...selectedItems];
-    newItems[index] = { ...item, height: value };
+    newItems[index] = { ...item, [attribute]: value };
     setSelectedItems(newItems);
   };
 
-  const handleWidthChange = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, width: value };
-    setSelectedItems(newItems);
-  };
-
-  const handleBlockImageWidth = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, image_width: value };
-    setSelectedItems(newItems);
-  };
-
-  const handleBlockImageHeight = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, image_height: value };
-    setSelectedItems(newItems);
-  };
-
-  const handleBlockImageRadius = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, image_radius: value };
-    setSelectedItems(newItems);
-  };
-
-  const handleBorderRadiusChange = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, borderRadius: value };
-    setSelectedItems(newItems);
-  };
-
-  const handleAlignmentChange = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, alignment: value };
-    setSelectedItems(newItems);
-  };
-
-  const handleBlockImageAlignment = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, image_align: value };
-    setSelectedItems(newItems);
-  };
-
-  const handleaddImage = (e, index, item) => {
+  const handleaddImage = async (e, index, item) => {
     const newItems = [...selectedItems];
     const files = e.target.files;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      const res = await uploadImageFunction(file);
       if (file) {
         const reader = new FileReader();
         reader.onloadend = () => {
           newItems[index] = {
             ...item,
-            Imagedata: reader.result,
+            Imagedata: "../" + res.imagepath,
             image_align: "center",
             image_width: "10",
             image_height: "10",
@@ -140,17 +100,18 @@ export default function DisplayEditPage({ Edititems,responseData }) {
     }
   };
 
-  const handlereplaceImage = (e, index, item) => {
+  const handlereplaceImage = async (e, index, item) => {
     const newItems = [...selectedItems];
     const files = e.target.files;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file) {
+        const res = await uploadImageFunction(file);
         const reader = new FileReader();
         reader.onloadend = () => {
           newItems[index] = {
             ...item,
-            data: reader.result,
+            data: "../" + res.imagepath,
           };
           setSelectedItems([...newItems]);
         };
@@ -159,18 +120,88 @@ export default function DisplayEditPage({ Edititems,responseData }) {
     }
   };
 
-  const handleItemChange = (e, Item) => {
+  async function uploadImageFunction(image) {
+    try {
+      const formData = new FormData();
+      formData.append("image_name_in_form", image);
+
+      const response = await fetch(`/api/upload-image`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      } else {
+        const responseData = await response.json();
+        return responseData;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function publishFunction({ newItems, index }) {
+    const data = {
+      newItems: newItems,
+      index: index,
+    };
+    try {
+      const response = await fetch(`/api/publish`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      console.log("Published Successfully");
+      navigate("/admin-config");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function saveEditFunction({ newItems, index }) {
+    const data = {
+      newItems: newItems,
+      index: index,
+    };
+    try {
+      const response = await fetch(`/api/save-edit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      console.log("Saved Successfully");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleItemChange = async (e, Item) => {
     if (Item === "Image") {
       const files = e.target.files;
       const newItems = [...selectedItems];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        const res = await uploadImageFunction(file);
         if (file) {
           const reader = new FileReader();
           reader.onloadend = () => {
             newItems.push({
               type: "Image",
-              data: reader.result,
+              data: "../" + res.imagepath,
               isdone: false,
               width: "50",
               height: "50",
@@ -191,6 +222,7 @@ export default function DisplayEditPage({ Edititems,responseData }) {
       const newBlockId = blockId + 1;
       newItems.push({
         type: "Blocks",
+        class: "Block",
         data: "",
         isdone: false,
         isFirst: true, // Set isFirst property
@@ -201,6 +233,7 @@ export default function DisplayEditPage({ Edititems,responseData }) {
       });
       newItems.push({
         type: "Blocks",
+        class: "Block",
         data: "",
         isdone: false,
         isFirst: false, // Set isFirst property
@@ -214,60 +247,12 @@ export default function DisplayEditPage({ Edititems,responseData }) {
     }
   };
 
-  async function publishFunction({newItems,index}){
-    const data = {
-      newItems: newItems,
-      index: index
-    };
-    try{
-      const response = await fetch(`/api/publish`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      
-      console.log("Published Successfully");
-      navigate('/admin-config');
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async function saveEditFunction({newItems,index}){
-    const data = {
-      newItems: newItems,
-      index: index
-    };
-    try{
-      const response = await fetch(`/api/save-edit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      console.log("Saved Successfully");
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const handleSave = async (index) => {
     let newItems = [...selectedItems];
     newItems.forEach((obj) => {
       obj.isdone = true;
     });
-    const res = await saveEditFunction({newItems: newItems,index: index});
+    const res = await saveEditFunction({ newItems: newItems, index: index });
     setSelectedItems([...newItems]);
     setShow(false);
     setSelectedIndex(1000);
@@ -278,7 +263,7 @@ export default function DisplayEditPage({ Edititems,responseData }) {
     newItems.forEach((obj) => {
       obj.isdone = true;
     });
-    const res = await publishFunction({newItems: newItems,index: index});
+    const res = await publishFunction({ newItems: newItems, index: index });
     setSelectedItems([...newItems]);
     setShow(false);
     setSelectedIndex(1000);
@@ -307,15 +292,23 @@ export default function DisplayEditPage({ Edititems,responseData }) {
           </div>
         ))}
         <div className="Last_Item">
-          <div className="Last_Item_each" onClick={() => handleSave({ index: responseData })}>
+          <div
+            className="Last_Item_each"
+            onClick={() => handleSave({ index: responseData.newindex })}
+          >
             Save
           </div>
-          <div className="Last_Item_each" onClick={() => handlePublish({ index: responseData })}>Publish</div>
+          <div
+            className="Last_Item_each"
+            onClick={() => handlePublish({ index: responseData.newindex })}
+          >
+            Publish
+          </div>
         </div>
         <input
           id="imageInput"
           type="file"
-          name = "image_name_in_form"
+          name="image_name_in_form"
           accept="image/*"
           onChange={(e) => handleItemChange(e, "Image")}
           multiple
@@ -337,7 +330,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               max="100"
               value={selectedItems[selectedIndex].width || 50}
               onChange={(event) =>
-                handleWidthChange(
+                handleAttributeChange(
+                  "width",
                   event.target.value,
                   selectedIndex,
                   selectedItems[selectedIndex]
@@ -351,7 +345,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               max="100"
               value={selectedItems[selectedIndex].width || 50}
               onChange={(event) =>
-                handleWidthChange(
+                handleAttributeChange(
+                  "width",
                   event.target.value,
                   selectedIndex,
                   selectedItems[selectedIndex]
@@ -370,7 +365,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               max="100"
               value={selectedItems[selectedIndex].height || 50}
               onChange={(event) =>
-                handleHeightChange(
+                handleAttributeChange(
+                  "height",
                   event.target.value,
                   selectedIndex,
                   selectedItems[selectedIndex]
@@ -384,7 +380,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               max="100"
               value={selectedItems[selectedIndex].height || 50}
               onChange={(event) =>
-                handleHeightChange(
+                handleAttributeChange(
+                  "height",
                   event.target.value,
                   selectedIndex,
                   selectedItems[selectedIndex]
@@ -403,7 +400,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               max="100"
               value={selectedItems[selectedIndex].borderRadius || 0}
               onChange={(event) =>
-                handleBorderRadiusChange(
+                handleAttributeChange(
+                  "borderRadius",
                   event.target.value,
                   selectedIndex,
                   selectedItems[selectedIndex]
@@ -417,7 +415,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               max="100"
               value={selectedItems[selectedIndex].borderRadius || 0}
               onChange={(event) =>
-                handleBorderRadiusChange(
+                handleAttributeChange(
+                  "borderRadius",
                   event.target.value,
                   selectedIndex,
                   selectedItems[selectedIndex]
@@ -433,7 +432,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
             <select
               value={selectedItems[selectedIndex].alignment || ""}
               onChange={(e) =>
-                handleAlignmentChange(
+                handleAttributeChange(
+                  "alignment",
                   e.target.value,
                   selectedIndex,
                   selectedItems[selectedIndex]
@@ -523,28 +523,31 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               onClick={() => handleItemClick(index)}
               style={{
                 border:
-                  selectedIndex === index
+                  selectedIndex === index && item.type === "Text"
                     ? `2px solid blue`
                     : "2px solid transparent",
                 height: "auto",
-                margin: "0 0 5% 0",
+                width: "100%",
+                marginBottom: "15px",
               }}
             >
-              <div dangerouslySetInnerHTML={{ __html: item.data }} />
+              <div dangerouslySetInnerHTML={{ __html: textContent }} />
             </div>
           </>
         ) : (
           <>
-            <div className="textContainer" key={index}>
-              <ReactQuill
-                value={textContent}
-                onChange={handleTextChange}
-                modules={modules}
-                // formats={formats}
-                placeholder="Type your Text Here.."
-              />
+            <div>
+              <div className="textContainer" key={index}>
+                <ReactQuill
+                  value={textContent}
+                  onChange={handleTextChange}
+                  modules={modules}
+                  // theme={item.type === 'Blocks' ? 'bubble' : 'snow'}
+                  placeholder="Type your Text Here.."
+                />
+              </div>
+              <button onClick={handleChangesDone}>Done</button>
             </div>
-            <button onClick={handleChangesDone}>Done</button>
           </>
         )}
       </>
@@ -575,14 +578,15 @@ export default function DisplayEditPage({ Edititems,responseData }) {
   function DisplayBlocks({ blocks, block_id }) {
     return (
       <>
-        <div
-          key={block_id}
-          className="Block-row"
-        >
+        <div key={block_id} className="Block_row">
           {blocks.map((item) => (
             <div
-              className="Block"
-              onClick={() => handleItemClick(item.index)}
+              className={item.Block.class}
+              key={item.index}
+              onClick={() => {
+                console.log("Item class:", item.class); // Log the class name
+                handleItemClick(item.index);
+              }}
               style={{
                 border:
                   selectedIndex === item.index
@@ -598,6 +602,7 @@ export default function DisplayEditPage({ Edititems,responseData }) {
                   className="imageContainer"
                   style={{
                     justifyContent: `${item.Block.image_align}`,
+                    alignItems: `${item.Block.image_align}`,
                   }}
                   key={item.index}
                 >
@@ -612,7 +617,7 @@ export default function DisplayEditPage({ Edititems,responseData }) {
                   />
                 </div>
               )}
-              <DisplayBlockText
+              <DisplayText
                 key={item.index}
                 item={item.Block}
                 index={item.index}
@@ -620,45 +625,6 @@ export default function DisplayEditPage({ Edititems,responseData }) {
             </div>
           ))}
         </div>
-      </>
-    );
-  }
-
-  function DisplayBlockText({ item, index }) {
-    const [textContent, setTextContent] = useState(item.data || "");
-
-    const handleTextChange = (value) => {
-      setTextContent(value);
-    };
-
-    const handleChangesDone = () => {
-      const newItems = [...selectedItems];
-      newItems[index] = { ...item, data: textContent, isdone: true };
-      setSelectedItems(newItems);
-    };
-
-    return (
-      <>
-        {item.isdone ? (
-          <>
-            <div className="ql-editor" style={{ height: "auto" }}>
-              <div dangerouslySetInnerHTML={{ __html: item.data }} />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="textContainer" key={index}>
-              <ReactQuill
-                value={textContent}
-                onChange={handleTextChange}
-                modules={modules}
-                // formats={formats}
-                placeholder="Type your Text Here.."
-              />
-            </div>
-            <button onClick={handleChangesDone}>Done</button>
-          </>
-        )}
       </>
     );
   }
@@ -681,18 +647,6 @@ export default function DisplayEditPage({ Edititems,responseData }) {
       </>
     );
   }
-
-  const handleBgColorChange = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, bgcolor: value };
-    setSelectedItems(newItems);
-  };
-
-  const handletxtColorChange = (value, index, item) => {
-    const newItems = [...selectedItems];
-    newItems[index] = { ...item, color: value };
-    setSelectedItems(newItems);
-  };
 
   const handleaddBlock = (item, index) => {
     setSelectedItems((prevItems) => {
@@ -743,7 +697,7 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               type="color"
               value={item.color}
               onChange={(event) =>
-                handletxtColorChange(event.target.value, index, item)
+                handleAttributeChange("color", event.target.value, index, item)
               }
               className="InputField"
             />
@@ -754,7 +708,12 @@ export default function DisplayEditPage({ Edititems,responseData }) {
               type="color"
               value={item.bgcolor}
               onChange={(event) =>
-                handleBgColorChange(event.target.value, index, item)
+                handleAttributeChange(
+                  "bgcolor",
+                  event.target.value,
+                  index,
+                  item
+                )
               }
               className="InputField"
             />
@@ -787,6 +746,18 @@ export default function DisplayEditPage({ Edititems,responseData }) {
         >
           <div className="align">Add image</div>
         </div>
+        <div
+          className="Item"
+          onClick={() => {
+            item.class === "Block"
+              ? handleAttributeChange("class", "Card", index, item)
+              : handleAttributeChange("class", "Block", index, item);
+          }}
+        >
+          <div className="align">
+            Make it {item.class === "Block" ? "Card" : "Block"}
+          </div>
+        </div>
         <input
           id="TakeimageInput"
           type="file"
@@ -806,7 +777,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
                   max="100"
                   value={selectedItems[selectedIndex].image_width}
                   onChange={(event) =>
-                    handleBlockImageWidth(
+                    handleAttributeChange(
+                      "image_width",
                       event.target.value,
                       selectedIndex,
                       selectedItems[selectedIndex]
@@ -825,7 +797,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
                   max="100"
                   value={selectedItems[selectedIndex].image_height}
                   onChange={(event) =>
-                    handleBlockImageHeight(
+                    handleAttributeChange(
+                      "image_height",
                       event.target.value,
                       selectedIndex,
                       selectedItems[selectedIndex]
@@ -844,7 +817,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
                   max="100"
                   value={selectedItems[selectedIndex].image_radius}
                   onChange={(event) =>
-                    handleBlockImageRadius(
+                    handleAttributeChange(
+                      "image_radius",
                       event.target.value,
                       selectedIndex,
                       selectedItems[selectedIndex]
@@ -860,7 +834,8 @@ export default function DisplayEditPage({ Edititems,responseData }) {
                 <select
                   value={selectedItems[selectedIndex].image_align}
                   onChange={(e) =>
-                    handleBlockImageAlignment(
+                    handleAttributeChange(
+                      "image_align",
                       e.target.value,
                       selectedIndex,
                       selectedItems[selectedIndex]
@@ -870,9 +845,29 @@ export default function DisplayEditPage({ Edititems,responseData }) {
                   style={{ width: "65px" }}
                 >
                   <option value="">None</option>
-                  <option value="left">Left</option>
+                  <option
+                    value={
+                      selectedItems[selectedIndex].class === "Block"
+                        ? "left"
+                        : "start"
+                    }
+                  >
+                    {selectedItems[selectedIndex].class === "Block"
+                      ? "Left"
+                      : "Start"}
+                  </option>
                   <option value="center">Center</option>
-                  <option value="right">Right</option>
+                  <option
+                    value={
+                      selectedItems[selectedIndex].class === "Block"
+                        ? "right"
+                        : "end"
+                    }
+                  >
+                    {selectedItems[selectedIndex].class === "Block"
+                      ? "Right"
+                      : "End"}
+                  </option>
                 </select>
               </div>
             </div>
@@ -883,88 +878,93 @@ export default function DisplayEditPage({ Edititems,responseData }) {
   }
 
   return (
-    <div className="pageContainer">
-      <div className="MainContent">
-        {selectedItems.map((item, index) => (
-          <React.Fragment key={index}>
-            {item.type === "Image" && (
-              <DisplayImage item={item} index={index} />
-            )}
-            {item.type === "Text" && (
-              <DisplayText key={index} item={item} index={index} />
-            )}
-            {item.type === "Blocks" &&
-              blocksData[item.block_id] &&
-              item.isFirst && (
-                <DisplayBlocks
-                  blocks={blocksData[item.block_id]}
-                  block_id={item.block_id}
-                />
+    <>
+      {/* <Navbar responseData={responseData} /> */}
+      <div className="pageContainer">
+        <div className="MainContent">
+          {selectedItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {item.type === "Image" && (
+                <DisplayImage item={item} index={index} />
               )}
-          </React.Fragment>
-        ))}
-      </div>
-      {!Show && (
-        <div className="arrow" onClick={() => setShow(true)}>
-          <FontAwesomeIcon icon={faAngleLeft} />
+              {item.type === "Text" && (
+                <DisplayText key={index} item={item} index={index} />
+              )}
+              {item.type === "Blocks" &&
+                blocksData[item.block_id] &&
+                item.isFirst && (
+                  <DisplayBlocks
+                    blocks={blocksData[item.block_id]}
+                    block_id={item.block_id}
+                  />
+                )}
+            </React.Fragment>
+          ))}
         </div>
-      )}
-      {Show && (
-        <>
-          <div className="arrow" onClick={() => setShow(false)}>
-            <FontAwesomeIcon icon={faAngleRight} />
+        {!Show && (
+          <div className="arrow" onClick={() => setShow(true)}>
+            <FontAwesomeIcon icon={faAngleLeft} />
           </div>
-          <div className="container">
-            <div className="Tabs">
-              {New ? (
-                <>
-                  <div className="edit" onClick={() => setNew(true)}>
-                    New
-                  </div>
-                  <div className="new" onClick={() => setNew(false)}>
-                    Edit
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="new" onClick={() => setNew(true)}>
-                    New
-                  </div>
-                  <div className="edit" onClick={() => setNew(false)}>
-                    Edit
-                  </div>
-                </>
-              )}
+        )}
+        {Show && (
+          <>
+            <div className="arrow" onClick={() => setShow(false)}>
+              <FontAwesomeIcon icon={faAngleRight} />
             </div>
-            {!New && selectedIndex >= selectedItems.length && (
-              <div className="defaultEdit">
-                <p>Please select the </p>
-                <p>item to edit !</p>
+            <div className="container">
+              <div className="Tabs">
+                {New ? (
+                  <>
+                    <div className="edit" onClick={() => setNew(true)}>
+                      New
+                    </div>
+                    <div className="new" onClick={() => setNew(false)}>
+                      Edit
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="new" onClick={() => setNew(true)}>
+                      New
+                    </div>
+                    <div className="edit" onClick={() => setNew(false)}>
+                      Edit
+                    </div>
+                  </>
+                )}
               </div>
-            )}
-            {!New &&
-              selectedIndex < selectedItems.length &&
-              selectedItems[selectedIndex].type === "Image" && <ImageEditor />}
-            {!New &&
-              selectedIndex < selectedItems.length &&
-              selectedItems[selectedIndex].type === "Text" && (
-                <TextEditor
-                  item={selectedItems[selectedIndex]}
-                  index={selectedIndex}
-                />
+              {!New && selectedIndex >= selectedItems.length && (
+                <div className="defaultEdit">
+                  <p>Please select the </p>
+                  <p>item to edit !</p>
+                </div>
               )}
-            {!New &&
-              selectedIndex < selectedItems.length &&
-              selectedItems[selectedIndex].type === "Blocks" && (
-                <BlockEditor
-                  item={selectedItems[selectedIndex]}
-                  index={selectedIndex}
-                />
-              )}
-            {New && <DisplayNew />}
-          </div>
-        </>
-      )}
-    </div>
+              {!New &&
+                selectedIndex < selectedItems.length &&
+                selectedItems[selectedIndex].type === "Image" && (
+                  <ImageEditor />
+                )}
+              {!New &&
+                selectedIndex < selectedItems.length &&
+                selectedItems[selectedIndex].type === "Text" && (
+                  <TextEditor
+                    item={selectedItems[selectedIndex]}
+                    index={selectedIndex}
+                  />
+                )}
+              {!New &&
+                selectedIndex < selectedItems.length &&
+                selectedItems[selectedIndex].type === "Blocks" && (
+                  <BlockEditor
+                    item={selectedItems[selectedIndex]}
+                    index={selectedIndex}
+                  />
+                )}
+              {New && <DisplayNew />}
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }

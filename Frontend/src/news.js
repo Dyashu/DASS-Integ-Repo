@@ -12,8 +12,15 @@ import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import ImageResize from "quill-image-resize-module-react";
-import Footer from "./Footer.js";
+// import Footer from "./Footer.js";
 import Button from "@mui/material/Button";
+import Modal from '@mui/material/Modal';
+import Input from '@mui/material/Input';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+
+
 
 Quill.register("modules/imageResize", ImageResize);
 const modules = {
@@ -165,6 +172,7 @@ function NewsPage() {
     const [textContent, setTextContent] = useState(item.content || "");
     const [titleContent, setTitleContent] = useState(item.title || "");
     const [linkContent, setlinkContent] = useState(item.link || "");
+    
 
     const handleTitleChange = (event) => {
       setTitleContent(event.target.value);
@@ -203,7 +211,7 @@ function NewsPage() {
                 height: "auto",
                 marginBottom: "15px",
                 fontSize: "1.5vw",
-                padding: "0",
+                padding:"0"
               }}
             >
               <div dangerouslySetInnerHTML={{ __html: textContent }} />
@@ -222,7 +230,7 @@ function NewsPage() {
           <>
             <input
               type="text"
-              className="InputField"
+              className="InputField_1"
               value={titleContent}
               onChange={(e) => handleTitleChange(e)}
             />
@@ -242,7 +250,7 @@ function NewsPage() {
                 <p style={{ fontWeight: "bold" }}> Link : </p>
                 <input
                   type="text"
-                  className="InputField"
+                  className="InputField_1"
                   style={{
                     width: "78%",
                     fontSize: "initial",
@@ -272,19 +280,109 @@ function NewsPage() {
     const after = newItems.slice(index + 1);
     setnewsItems([...before, ...after]);
   };
+  const [openModal, setOpenModal] = useState(false);
+  const [newsTitle, setNewsTitle] = useState('');
+  const [newsContent, setNewsContent] = useState('');
+  const [newsImage, setNewsImage] = useState('');
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setNewsTitle("");
+    setNewsContent("");
+    setNewsImage(null);
+  };
+
+  const handleNewsTitleChange = (event) => {
+    setNewsTitle(event.target.value);
+  };
+
+  const handleNewsContentChange = (event) => {
+    setNewsContent(event.target.value);
+  };
+
+  const handleNewsImageChange = (event) => {
+    const file = event.target.files[0]; // Get the first file from the input
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const imageData = e.target.result; // Base64 encoded image data
+      setNewsImage(imageData); // Update the state with the image data
+    };
+
+    // Read the file as a data URL (base64 encoded)
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = () => {
+    // Handle form submission here
+    console.log('News Title:', newsTitle);
+    console.log('News Content:', newsContent);
+    console.log('News Image:', newsImage);
+    handleCloseModal();
+  };
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+  };
 
   return (
     <>
       <div className="container_news">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems:"center" }}>
+        <div style={{display:"flex", justifyContent:"space-between"}}>
           <div className="Heading">News</div>
+          <div className="Add-Publish">
+          <Button variant="contained" sx={{ width: "10vw", mb:"1%", mt:"1%", fontSize: "1vw"}} onClick={handleOpenModal}>Add News</Button> 
+          <Modal open={openModal} onClose={handleCloseModal}>
+              <Box sx={style}>
+                <Typography variant="h6" component="h2">
+                  Add News
+                </Typography>
+                <TextField
+                  label="Title"
+                  variant="outlined"
+                  value={newsTitle}
+                  onChange={handleNewsTitleChange}
+                  fullWidth
+                  sx={{ mt: 2 }}
+                />
+                <TextField
+                  label="Content"
+                  variant="outlined"
+                  value={newsContent}
+                  onChange={handleNewsContentChange}
+                  fullWidth
+                  multiline
+                  rows={4}
+                  sx={{ mt: 2 }}
+                />
+                <Input
+                  type="file"
+                  onChange={handleNewsImageChange}
+                  fullWidth
+                  sx={{ mt: 2 }}
+                />
+                <Button onClick={handleSubmit} variant="contained" sx={{ mt: 2 }}>
+                  Submit
+                </Button>
+              </Box>
+            </Modal>
           <Button
             variant="contained"
-            sx={{ width: "10vw", mb: "1%", mt: "1%", fontSize: "1vw" }}
+            sx={{ width: "10vw", mb:"1%", mt:"1%", fontSize: "1vw"}}
             className="PublishNews"
           >
             Publish
           </Button>
+          </div>
         </div>
         {newsItems.map((item, index) => (
           <div
@@ -308,9 +406,9 @@ function NewsPage() {
             >
               <img
                 src={item.image}
-                alt="Newsimage"
+                alt="Newsmage"
                 className={
-                  editStates[index].editImage ? "HoveredNewsImage" : "NewsImage"
+                  editStates[index].editImage ? "hovered_image" : "image"
                 }
               />
               {editStates[index].editImage && (
@@ -346,7 +444,7 @@ function NewsPage() {
           </div>
         ))}
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

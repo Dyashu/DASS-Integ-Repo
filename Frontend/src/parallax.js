@@ -11,6 +11,7 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import Input from "@mui/material/Input";
 import TextField from "@mui/material/TextField";
+import Footer from './Footer'
 
 const style = {
   position: "absolute",
@@ -141,7 +142,6 @@ const ParallaxScroll = () => {
     <div>
       {/* Add the Navbar component here */}
       <Navbar />
-
       <div>
         <div className="parallax">
           <CutoutTextEffect />
@@ -237,10 +237,17 @@ const ParallaxScroll = () => {
             <Slide />
           </div>
         </div>
-        <div className="FAQ-container">
+        <div
+        style={{
+          height:"5vh",
+          background:'#ffff'
+        }}>
+        </div>
+        <Footer />
+        {/* <div className="FAQ-container">
           <h2 style={{ textAlign: "center" }}>FAQ</h2>
           <UpcomingEvents />
-        </div>
+        </div> */}
       </div>
     </div>
   );

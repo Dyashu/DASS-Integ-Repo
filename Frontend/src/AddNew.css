@@ -32,7 +32,7 @@
 }
 
 .container {
-  height: 100vh;
+  height: 90vh;
   width: 20vw;
   background: #e7e7e7;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
@@ -143,18 +143,34 @@
   padding: 1%;
   max-width: calc(100% - 10px);
   overflow-y: auto;
+  /* display: flex;
+  flex-direction: row; */
 }
 
-.Block-row.two-Blocks .Block {
-  flex: 1 1 50%; /* Each Block occupies 5.Block-row */
+.Card{
+  flex: 1 1;
+  margin-left: 2%;
+  margin-right: 2%;
+  /* background: #FEFEFF; */
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 1%;
+  max-width: calc(100% - 10px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: row;
 }
 
-.Block-row.three-Blocks .Block {
-  flex: 1 1 33.33%; /* Each Block occupies 33.3.Block-row */
+.Block_row.two-Blocks .Block {
+  flex: 1 1 50%;
 }
 
-.Block-row.four-Blocks .Block {
-  flex: 1 1 25%; /* Each container occupies 25% of the row */
+.Block_row.three-Blocks .Block {
+  flex: 1 1 33.33%;
+}
+
+.Block_row.four-Blocks .Block {
+  flex: 1 1 25%;
 }
 
 .defaultEdit{

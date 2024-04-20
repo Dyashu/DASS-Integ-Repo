@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import "./AddNew.css";
 
-export default function DisplayView({selectedItems}) {
+export default function DisplayView({ selectedItems }) {
   const [blocksData, setBlocksData] = useState({});
 
   useEffect(() => {
@@ -24,6 +24,16 @@ export default function DisplayView({selectedItems}) {
     };
     groupByBlockId();
   }, [selectedItems]);
+
+  function removeAnchors(){
+    const anchors = document.querySelectorAll("a");
+    anchors.forEach((anchor) => {
+      anchor.target = "_self";
+      console.log(anchor.href);
+      console.log(anchor.target);
+      
+    });
+  }
 
   function DisplayImage({ item, index }) {
     return (
@@ -51,7 +61,8 @@ export default function DisplayView({selectedItems}) {
         className="ql-editor"
         style={{
           height: "auto",
-          margin: "0 0 5% 0",
+          width: "100%",
+          marginBottom: "15px",
         }}
       >
         <div dangerouslySetInnerHTML={{ __html: item.data }} />
@@ -62,10 +73,10 @@ export default function DisplayView({selectedItems}) {
   function DisplayBlocks({ blocks, block_id }) {
     return (
       <>
-        <div key={block_id} className="Block-row">
+        <div key={block_id} className="Block_row">
           {blocks.map((item) => (
             <div
-              className="Block"
+              className={item.Block.class}
               style={{
                 height: "auto",
                 backgroundColor: `${item.Block.bgcolor}`,
@@ -77,6 +88,7 @@ export default function DisplayView({selectedItems}) {
                   className="imageContainer"
                   style={{
                     justifyContent: `${item.Block.image_align}`,
+                    alignItems: `${item.Block.image_align}`,
                   }}
                   key={item.index}
                 >
@@ -101,21 +113,28 @@ export default function DisplayView({selectedItems}) {
 
   return (
     <div>
-      {selectedItems.map((item, index) => (
-        <React.Fragment key={index}>
-          {item.type === "Image" && <DisplayImage item={item} index={index} />}
-          {item.type === "Text" && <DisplayText key={index} item={item} />}
-          {console.log(blocksData)}
-          {item.type === "Blocks" &&
-            blocksData[item.block_id] &&
-            item.isFirst && (
-              <DisplayBlocks
-                blocks={blocksData[item.block_id]}
-                block_id={item.block_id}
-              />
-            )}
-        </React.Fragment>
-      ))}
+      <div className="pageContainer">
+        <div className="MainContent">
+          {selectedItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {item.type === "Image" && (
+                <DisplayImage item={item} index={index} />
+              )}
+              {item.type === "Text" && <DisplayText key={index} item={item} />}
+              {console.log(blocksData)}
+              {item.type === "Blocks" &&
+                blocksData[item.block_id] &&
+                item.isFirst && (
+                  <DisplayBlocks
+                    blocks={blocksData[item.block_id]}
+                    block_id={item.block_id}
+                  />
+                )}
+            </React.Fragment>
+          ))}
+          {removeAnchors()}
+        </div>
+      </div>
     </div>
   );
 }

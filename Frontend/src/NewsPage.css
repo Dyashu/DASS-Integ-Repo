@@ -102,7 +102,7 @@ h2 {
   margin-bottom: 3%;
 }
 
-.InputField {
+.InputField_1 {
   border: none;
   border-bottom: 1px solid rgb(188, 188, 188);
   outline: none;
@@ -123,4 +123,17 @@ h2 {
   position: absolute;
   bottom: 5%;
   right: 4%;
+}
+
+.EventsDate {
+  position: absolute;
+  bottom : 5%;
+  font-size: 1.5vw;
+}
+
+.Add-Publish{
+  display: flex;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  gap: 1vw;
 }

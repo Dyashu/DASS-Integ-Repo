@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { useLocation,useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from "react-router-dom";
 import "./AddNew.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -8,45 +8,62 @@ import {
   faAngleLeft,
   faAngleRight,
 } from "@fortawesome/free-solid-svg-icons";
-import ReactQuill, { Quill } from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import ImageResize from 'quill-image-resize-module-react';
-import Navbar from './Navbar3' 
+import ReactQuill, { Quill } from "react-quill";
+import "react-quill/dist/quill.snow.css";
+// import "react-quill/dist/quill.bubble.css";
+import ImageResize from "quill-image-resize-module-react";
+import Navbar from "./Navbar3";
 import axios from "axios";
 
-Quill.register('modules/imageResize', ImageResize);
+Quill.register("modules/imageResize", ImageResize);
+
+// const Link = Quill.import("formats/link");
+
+// class CustomLink extends Link {
+//   static create(value) {
+//     const node = super.create(value);
+//     node.removeAttribute("target"); // Remove target attribute
+//     return node;
+//   }
+// }
+
+// Quill.register(CustomLink, true);
 
 const Items = ["Image", "Text", "Blocks"];
 
 const modules = {
   toolbar: [
-    [{ header: '1' }, { header: '2' }, { font: [] }],
-    [{ size: [] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{ header: "1" }, { header: "2" }, { size: [] }],
+    ["bold", "italic", "underline", "strike", "blockquote"],
     [
-      { list: 'ordered' },
-      { list: 'bullet' },
-      { indent: '-1' },
-      { indent: '+1' }
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" },
     ],
-    // [{ align:[ '', 'left', 'center', 'right', 'justify']}]
-    [{ align: '' }, { align: 'center' }, { align: 'right' }, { align: 'justify' }], // Alignment options
-    ['link', 'image', 'video'],
-    ['clean']
+    // [ {align:[]}],
+    [
+      { align: "" },
+      { align: "center" },
+      { align: "right" },
+      { align: "justify" },
+    ], // Alignment options
+    // [{ font: [] }],
+    ["link", "image"],
+    ["clean"],
   ],
   clipboard: {
-    matchVisual: false
+    matchVisual: false,
   },
   imageResize: {
-    parchment: Quill.import('parchment'),
-    modules: ['Resize', 'DisplaySize'],
-  }
+    parchment: Quill.import("parchment"),
+    modules: ["Resize", "DisplaySize"],
+  },
+  // link: CustomLink,
 };
 
-
 export default function AddNewPage() {
-
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const location = useLocation();
   const responseData = location.state?.responseData;
   const [Show, setShow] = useState(true);
@@ -54,14 +71,15 @@ export default function AddNewPage() {
   const [selectedIndex, setSelectedIndex] = useState(1000);
   const [selectedItems, setSelectedItems] = useState([]);
   const [blockId, setBlockId] = useState(0);
-  
+
   async function fetchPageContents(index) {
-    axios.get(`/api/display-save/${index}`)
-    .then(res => {
-      console.log(res.data.items);
-      setSelectedItems(res.data.items)
-    })
-    .catch(err => console.log("page-content empty"))
+    axios
+      .get(`/api/display-save/${index}`)
+      .then((res) => {
+        console.log(res.data.items);
+        setSelectedItems(res.data.items);
+      })
+      .catch((err) => console.log("page-content empty"));
   }
 
   useEffect(() => {
@@ -90,7 +108,7 @@ export default function AddNewPage() {
         reader.onloadend = () => {
           newItems[index] = {
             ...item,
-            Imagedata: "../" +  res.imagepath,
+            Imagedata: "../" + res.imagepath,
             image_align: "center",
             image_width: "10",
             image_height: "10",
@@ -126,15 +144,15 @@ export default function AddNewPage() {
   async function uploadImageFunction(image) {
     try {
       const formData = new FormData();
-      formData.append('image_name_in_form', image);
-  
+      formData.append("image_name_in_form", image);
+
       const response = await fetch(`/api/upload-image`, {
-        method: 'POST',
-        body: formData
+        method: "POST",
+        body: formData,
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to upload image');
+        throw new Error("Failed to upload image");
       } else {
         const responseData = await response.json();
         return responseData;
@@ -144,46 +162,46 @@ export default function AddNewPage() {
     }
   }
 
-  async function publishFunction({newItems,index}){
+  async function publishFunction({ newItems, index }) {
     const data = {
       newItems: newItems,
-      index: index
+      index: index,
     };
-    try{
+    try {
       const response = await fetch(`/api/publish`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
-      
+
       console.log("Published Successfully");
-      navigate('/admin-config');
+      navigate("/admin-config");
     } catch (error) {
       console.log(error);
     }
   }
 
-  async function saveEditFunction({newItems,index}){
+  async function saveEditFunction({ newItems, index }) {
     const data = {
       newItems: newItems,
-      index: index
+      index: index,
     };
-    try{
+    try {
       const response = await fetch(`/api/save-edit`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       console.log("Saved Successfully");
@@ -225,6 +243,7 @@ export default function AddNewPage() {
       const newBlockId = blockId + 1;
       newItems.push({
         type: "Blocks",
+        class: "Block",
         data: "",
         isdone: false,
         isFirst: true, // Set isFirst property
@@ -235,6 +254,7 @@ export default function AddNewPage() {
       });
       newItems.push({
         type: "Blocks",
+        class: "Block",
         data: "",
         isdone: false,
         isFirst: false, // Set isFirst property
@@ -253,7 +273,7 @@ export default function AddNewPage() {
     newItems.forEach((obj) => {
       obj.isdone = true;
     });
-    const res = await saveEditFunction({newItems: newItems,index: index});
+    const res = await saveEditFunction({ newItems: newItems, index: index });
     setSelectedItems([...newItems]);
     setShow(false);
     setSelectedIndex(1000);
@@ -264,7 +284,7 @@ export default function AddNewPage() {
     newItems.forEach((obj) => {
       obj.isdone = true;
     });
-    const res = await publishFunction({newItems: newItems,index: index});
+    const res = await publishFunction({ newItems: newItems, index: index });
     setSelectedItems([...newItems]);
     setShow(false);
     setSelectedIndex(1000);
@@ -293,15 +313,23 @@ export default function AddNewPage() {
           </div>
         ))}
         <div className="Last_Item">
-          <div className="Last_Item_each" onClick={() => handleSave({ index: responseData.newindex })}>
+          <div
+            className="Last_Item_each"
+            onClick={() => handleSave({ index: responseData.newindex })}
+          >
             Save
           </div>
-          <div className="Last_Item_each" onClick={() => handlePublish({ index: responseData.newindex })}>Publish</div>
+          <div
+            className="Last_Item_each"
+            onClick={() => handlePublish({ index: responseData.newindex })}
+          >
+            Publish
+          </div>
         </div>
         <input
           id="imageInput"
           type="file"
-          name = "image_name_in_form"
+          name="image_name_in_form"
           accept="image/*"
           onChange={(e) => handleItemChange(e, "Image")}
           multiple
@@ -520,6 +548,7 @@ export default function AddNewPage() {
                     ? `2px solid blue`
                     : "2px solid transparent",
                 height: "auto",
+                width: "100%",
                 marginBottom: "15px",
               }}
             >
@@ -528,15 +557,18 @@ export default function AddNewPage() {
           </>
         ) : (
           <>
-            <div className="textContainer" key={index}>
-              <ReactQuill
-                value={textContent}
-                onChange={handleTextChange}
-                modules={modules}
-                placeholder="Type your Text Here.."
-              />
+            <div className="textContainer">
+              <div key={index}>
+                <ReactQuill
+                  value={textContent}
+                  onChange={handleTextChange}
+                  modules={modules}
+                  // theme={item.type === 'Blocks' ? 'bubble' : 'snow'}
+                  placeholder="Type your Text Here.."
+                />
+              </div>
+              <button onClick={handleChangesDone}>Done</button>
             </div>
-            <button onClick={handleChangesDone}>Done</button>
           </>
         )}
       </>
@@ -562,19 +594,21 @@ export default function AddNewPage() {
       setBlocksData(grouped);
     };
     groupByBlockId();
+
   }, [selectedItems]);
 
   function DisplayBlocks({ blocks, block_id }) {
     return (
       <>
-        <div
-          key={block_id}
-          className="Block_row"
-        >
+        <div key={block_id} className="Block_row">
           {blocks.map((item) => (
             <div
-              className="Block"
-              onClick={() => handleItemClick(item.index)}
+              className={item.Block.class}
+              key={item.index}
+              onClick={() => {
+                console.log("Item class:", item.class); // Log the class name
+                handleItemClick(item.index);
+              }}
               style={{
                 border:
                   selectedIndex === item.index
@@ -590,6 +624,7 @@ export default function AddNewPage() {
                   className="imageContainer"
                   style={{
                     justifyContent: `${item.Block.image_align}`,
+                    alignItems: `${item.Block.image_align}`,
                   }}
                   key={item.index}
                 >
@@ -616,7 +651,6 @@ export default function AddNewPage() {
     );
   }
 
-
   const handleEdit = (item, index) => {
     const newItems = [...selectedItems];
     newItems[index] = { ...item, isdone: false };
@@ -634,7 +668,7 @@ export default function AddNewPage() {
         </div>
       </>
     );
-  };
+  }
 
   const handleaddBlock = (item, index) => {
     setSelectedItems((prevItems) => {
@@ -685,7 +719,7 @@ export default function AddNewPage() {
               type="color"
               value={item.color}
               onChange={(event) =>
-                handleAttributeChange("color",event.target.value, index, item)
+                handleAttributeChange("color", event.target.value, index, item)
               }
               className="InputField"
             />
@@ -696,7 +730,12 @@ export default function AddNewPage() {
               type="color"
               value={item.bgcolor}
               onChange={(event) =>
-                handleAttributeChange("bgcolor",event.target.value, index, item)
+                handleAttributeChange(
+                  "bgcolor",
+                  event.target.value,
+                  index,
+                  item
+                )
               }
               className="InputField"
             />
@@ -728,6 +767,18 @@ export default function AddNewPage() {
           onClick={() => document.getElementById("TakeimageInput").click()}
         >
           <div className="align">Add image</div>
+        </div>
+        <div
+          className="Item"
+          onClick={() => {
+            item.class === "Block"
+              ? handleAttributeChange("class", "Card", index, item)
+              : handleAttributeChange("class", "Block", index, item);
+          }}
+        >
+          <div className="align">
+            Make it {item.class === "Block" ? "Card" : "Block"}
+          </div>
         </div>
         <input
           id="TakeimageInput"
@@ -816,9 +867,29 @@ export default function AddNewPage() {
                   style={{ width: "65px" }}
                 >
                   <option value="">None</option>
-                  <option value="left">Left</option>
+                  <option
+                    value={
+                      selectedItems[selectedIndex].class === "Block"
+                        ? "left"
+                        : "start"
+                    }
+                  >
+                    {selectedItems[selectedIndex].class === "Block"
+                      ? "Left"
+                      : "Start"}
+                  </option>
                   <option value="center">Center</option>
-                  <option value="right">Right</option>
+                  <option
+                    value={
+                      selectedItems[selectedIndex].class === "Block"
+                        ? "right"
+                        : "end"
+                    }
+                  >
+                    {selectedItems[selectedIndex].class === "Block"
+                      ? "Right"
+                      : "End"}
+                  </option>
                 </select>
               </div>
             </div>
@@ -829,90 +900,93 @@ export default function AddNewPage() {
   }
 
   return (
-
-    <div className="pageContainer">
-      <div className="MainContent">
-        <Navbar responseData = {responseData}/>
-        {selectedItems.map((item, index) => (
-          <React.Fragment key={index}>
-            {item.type === "Image" && (
-              <DisplayImage item={item} index={index} />
-            )}
-            {item.type === "Text" && (
-              <DisplayText key={index} item={item} index={index} />
-            )}
-            {item.type === "Blocks" &&
-              blocksData[item.block_id] &&
-              item.isFirst && (
-                <DisplayBlocks
-                  blocks={blocksData[item.block_id]}
-                  block_id={item.block_id}
-                />
+    <>
+      <Navbar responseData={responseData} />
+      <div className="pageContainer">
+        <div className="MainContent">
+          {selectedItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {item.type === "Image" && (
+                <DisplayImage item={item} index={index} />
               )}
-          </React.Fragment>
-        ))}
-      </div>
-      {!Show && (
-        <div className="arrow" onClick={() => setShow(true)}>
-          <FontAwesomeIcon icon={faAngleLeft} />
+              {item.type === "Text" && (
+                <DisplayText key={index} item={item} index={index} />
+              )}
+              {item.type === "Blocks" &&
+                blocksData[item.block_id] &&
+                item.isFirst && (
+                  <DisplayBlocks
+                    blocks={blocksData[item.block_id]}
+                    block_id={item.block_id}
+                  />
+                )}
+            </React.Fragment>
+          ))}
         </div>
-      )}
-      {Show && (
-        <>
-          <div className="arrow" onClick={() => setShow(false)}>
-            <FontAwesomeIcon icon={faAngleRight} />
+        {!Show && (
+          <div className="arrow" onClick={() => setShow(true)}>
+            <FontAwesomeIcon icon={faAngleLeft} />
           </div>
-          <div className="container">
-            <div className="Tabs">
-              {New ? (
-                <>
-                  <div className="edit" onClick={() => setNew(true)}>
-                    New
-                  </div>
-                  <div className="new" onClick={() => setNew(false)}>
-                    Edit
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="new" onClick={() => setNew(true)}>
-                    New
-                  </div>
-                  <div className="edit" onClick={() => setNew(false)}>
-                    Edit
-                  </div>
-                </>
-              )}
+        )}
+        {Show && (
+          <>
+            <div className="arrow" onClick={() => setShow(false)}>
+              <FontAwesomeIcon icon={faAngleRight} />
             </div>
-            {!New && selectedIndex >= selectedItems.length && (
-              <div className="defaultEdit">
-                <p>Please select the </p>
-                <p>item to edit !</p>
+            <div className="container">
+              <div className="Tabs">
+                {New ? (
+                  <>
+                    <div className="edit" onClick={() => setNew(true)}>
+                      New
+                    </div>
+                    <div className="new" onClick={() => setNew(false)}>
+                      Edit
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="new" onClick={() => setNew(true)}>
+                      New
+                    </div>
+                    <div className="edit" onClick={() => setNew(false)}>
+                      Edit
+                    </div>
+                  </>
+                )}
               </div>
-            )}
-            {!New &&
-              selectedIndex < selectedItems.length &&
-              selectedItems[selectedIndex].type === "Image" && <ImageEditor />}
-            {!New &&
-              selectedIndex < selectedItems.length &&
-              selectedItems[selectedIndex].type === "Text" && (
-                <TextEditor
-                  item={selectedItems[selectedIndex]}
-                  index={selectedIndex}
-                />
+              {!New && selectedIndex >= selectedItems.length && (
+                <div className="defaultEdit">
+                  <p>Please select the </p>
+                  <p>item to edit !</p>
+                </div>
               )}
-            {!New &&
-              selectedIndex < selectedItems.length &&
-              selectedItems[selectedIndex].type === "Blocks" && (
-                <BlockEditor
-                  item={selectedItems[selectedIndex]}
-                  index={selectedIndex}
-                />
-              )}
-            {New && <DisplayNew />}
-          </div>
-        </>
-      )}
-    </div>
+              {!New &&
+                selectedIndex < selectedItems.length &&
+                selectedItems[selectedIndex].type === "Image" && (
+                  <ImageEditor />
+                )}
+              {!New &&
+                selectedIndex < selectedItems.length &&
+                selectedItems[selectedIndex].type === "Text" && (
+                  <TextEditor
+                    item={selectedItems[selectedIndex]}
+                    index={selectedIndex}
+                  />
+                )}
+              {!New &&
+                selectedIndex < selectedItems.length &&
+                selectedItems[selectedIndex].type === "Blocks" && (
+                  <BlockEditor
+                    item={selectedItems[selectedIndex]}
+                    index={selectedIndex}
+                  />
+                )}
+              {New && <DisplayNew />}
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }

@@ -51,8 +51,8 @@ const EventsPage = () => {
     <div className="EventsPageContainer">
       <h1 className="EventsPageTitle">All Events</h1>
       <div className="EventsList">
-        {events.map(event => (
-          <div key={event.id} className="EventItem">
+        {events.map((event,index) => (
+          <div key={index} className="EventItem">
             <img src={event.image} alt={event.title} className="EventImage" />
             <div className="EventContent">
               <h2 className="EventTitle">{event.title}</h2>

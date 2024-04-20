@@ -11,7 +11,8 @@ import { BrowserRouter, Routes ,Route, Link } from 'react-router-dom';
 import DisplayPublishPage from './DisplayPublishPage';
 import ParallaxScroll from './parallax'
 import NewsPage from './news'
-import EventsPage from './events'
+import EventsPage from './EditEvents'
+// import EventsPage from './events'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
